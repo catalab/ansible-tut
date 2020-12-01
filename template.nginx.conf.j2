@@ -1,0 +1,7 @@
+{% for val in site %}
+server {
+    listen {{hostvars['catalab']['http_port']}};
+    server_name {{val.name}};
+    root {{val.dir}};
+}
+{% endfor %}
