@@ -1,0 +1,47 @@
+- hosts: all
+  become: yes
+  connection: ssh
+  gather_facts: no
+
+  
+  tasks:
+
+  - name: install packages 
+    yum: 
+      name: "{{item}}"
+      update_cache: yes
+    loop:
+      - "chrony"
+      - "nginx"
+      - "git"
+
+  - file: 
+      path: /var/www/ansible-site
+      state: directory
+  
+  - git: 
+      # repo: https://github.com/whisk/ansible-tutorial
+      repo: https://github.com/catalab/ansible-tut.git
+      dest: /root/ansible-tutorial
+      depth: 1
+
+  # - shell: rsync -ru --del /root/ansible-tutorial/www/ /var/www/ansible/
+  
+  # - template:
+  #     src: template.nginx.conf.j2
+  #     dest: /etc/nginx/nginx.conf
+  #   vars:
+  #     site:
+  #       - name: 'foo.com'
+  #         dir: '/var/www/ansible/foo_com'
+  #   notify: restart nginx
+   
+
+  # handlers:
+  
+  # - name: restart nginx
+  #   service:
+  #     name: nginx
+  #     state: restarted
+  #     enabled: yes
+
