@@ -1,0 +1,62 @@
+- hosts: all
+  become: yes
+  connection: ssh
+  gather_facts: no
+  vars:
+    ansible_tut_dir: "~/ansible-tutorial"
+    ansible_www_dir: "/var/www/ansible"
+
+    
+  tasks:
+
+  - name: install packages 
+    yum: 
+      name: "{{item}}"
+      update_cache: yes
+    loop:
+      - "nginx"
+      - "git"
+
+  - name: create directory
+    file: 
+      path: "{{ ansible_www_dir }}"
+      state: directory
+  
+  - name: download web dummy-samples
+    git: 
+      repo: https://github.com/catalab/ansible-tut
+      dest: "{{ ansible_tut_dir }}"
+      depth: 1
+
+  - name: define variables based on containments of samples folder
+    set_fact:
+      htmls: "{{ htmls + [ {'name': item  | basename | splitext | first, 'file': item | basename }] }}"
+    loop: "{{ lookup('fileglob', 'git/www/*').split(',') }}"
+    vars:
+      htmls: []
+    
+  - name: copy www samples to remote machine
+    copy:
+      src: "{{ ansible_tut_dir }}/www/"
+      dest:  "{{ ansible_www_dir }}"
+      remote_src: yes
+
+  - name: add new nginx config to allow 8080 port response with samples
+    template:
+      src: template.nginx.conf.j2
+      dest: /etc/nginx/conf.d/ansible-tut.conf
+    notify: restart nginx
+  
+  - name: setup for web samples folder and update selinux rules to allow new port listening
+    shell: |
+            setsebool -P httpd_can_network_connect on
+            chcon -Rt httpd_sys_content_t "{{ ansible_www_dir }}"
+
+  handlers:
+  
+  - name: restart nginx
+    service:
+      name: nginx
+      state: restarted
+      enabled: yes
+
