@@ -1,8 +1,0 @@
-{% for val in htmls %}
-{% set hmtl_name = (val.name | basename | splitext | first) %-}
-server {
-    listen {{hostvars['catalab']['http_port']}};
-    server_name {{ hmtl_name }};
-    root /var/www/ansible/{{ hmtl_name }};
-}
-{% endfor %}
