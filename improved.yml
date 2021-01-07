@@ -31,7 +31,7 @@
   - name: define variables based on containments of samples folder
     set_fact:
       htmls: "{{ htmls + [ {'name': item  | basename | splitext | first, 'file': item | basename }] }}"
-    loop: "{{ lookup('fileglob', 'git/www/*').split(',') }}"
+    loop: "{{ lookup('fileglob', 'www/*').split(',') }}"
     vars:
       htmls: []
     
