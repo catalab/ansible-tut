@@ -1,0 +1,39 @@
+- name: install packages 
+  yum: 
+    name: "{{item}}"
+    update_cache: yes
+  loop:
+    - "nginx"
+
+
+- name: Find /var/log files equal or greater than 10 megabytes ending with .old or .log.gz
+  find:
+    paths: "{{ htmls_source }}"
+    patterns: '*.html'
+  register: html_files
+
+
+- name: define variables based on containments of samples folder
+  set_fact:
+    htmls: "{{ htmls + [ {'name': item.path  | basename | splitext | first, 'file': item.path | basename }] }}"
+  loop: "{{ html_files.files }}"
+
+
+- name: copy www samples to remote machine
+  copy:
+    src: "{{ htmls_source }}"
+    dest:  "{{ ansible_www_dir }}"
+    remote_src: yes
+
+
+- name: add new nginx config to allow 8080 port response with samples
+  template:
+    src: template.nginx.conf.j2
+    dest: "{{ ansible_nginx_conf }}"
+  notify: restart nginx
+
+
+- name: setup for web samples folder and update selinux rules to allow new port listening
+  shell: |
+          setsebool -P httpd_can_network_connect on
+          chcon -Rt httpd_sys_content_t "{{ ansible_www_dir }}"

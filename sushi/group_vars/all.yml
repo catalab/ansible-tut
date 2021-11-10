@@ -1,0 +1,4 @@
+ansible_temp_dir: "ansible-temp"
+ansible_www_dir: "/var/www/ansible"
+ansible_nginx_conf: "/etc/nginx/conf.d/ansible-temp.conf"
+git_repo: https://github.com/catalab/ansible-tut

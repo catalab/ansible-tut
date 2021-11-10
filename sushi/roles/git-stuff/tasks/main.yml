@@ -1,0 +1,17 @@
+- name: install packages 
+  yum: 
+    name: "{{item}}"
+    update_cache: yes
+  loop:
+    - "git"
+
+- name: create directory
+  file: 
+    path: "{{ ansible_www_dir }}"
+    state: directory
+
+- name: download web dummy-samples
+  git: 
+    repo: "{{ git_repo }}"
+    dest: "{{ ansible_temp_dir }}"
+    depth: 1

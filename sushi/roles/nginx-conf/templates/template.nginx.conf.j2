@@ -1,0 +1,10 @@
+server {
+    listen {{ http_port }};
+    server_name ansible_tutorial;
+    root /var/www/ansible/;
+{% for val in htmls %}
+    location /{{ val.name }} {
+        try_files $uri $uri.html /{{ val.file }};
+    }
+{% endfor %}
+}
